@@ -23,6 +23,7 @@ class Entry < ApplicationRecord
   after_commit :increment_feed_stat, on: :create
   after_commit :touch_feed_last_published_entry, on: :create
   after_commit :harvest_links, on: :create
+  after_commit :harvest_embeds, on: [:create, :update]
   after_commit :cache_extracted_content, on: :create
   after_commit :cache_views, on: [:create, :update]
   after_commit :save_twitter_users, on: [:create]
@@ -213,7 +214,7 @@ class Entry < ApplicationRecord
   end
 
   def self.entries_list
-    select(:id, :feed_id, :title, :summary, :published, :image, :data, :author, :url, :updated_at)
+    select(:id, :feed_id, :title, :summary, :published, :image, :data, :author, :url, :updated_at, :settings)
   end
 
   def self.include_unread_entries(user_id)
@@ -465,6 +466,10 @@ class Entry < ApplicationRecord
     if data && data["itunes_image"]
       ItunesImage.perform_async(id, data["itunes_image"])
     end
+  end
+
+  def harvest_embeds
+    HarvestEmbeds.perform_async(id)
   end
 
   def harvest_links

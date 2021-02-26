@@ -5,7 +5,7 @@ class IframeEmbed
 
   def initialize(embed_url)
     @embed_url = URI(embed_url)
-    @embed_url.scheme ||= "http"
+    @embed_url.scheme = "https"
   end
 
   def title
@@ -26,6 +26,15 @@ class IframeEmbed
 
   def type
     data && data["type"]
+  end
+
+  # subclass should implement these
+  def channel_name; end
+  def duration; end
+  def profile_image; end
+
+  def cache_key
+    "v1"
   end
 
   def iframe_src
@@ -96,13 +105,13 @@ class IframeEmbed
 
   def self.embed_sources
     [
-      Embed::Youtube,
-      Embed::Vimeo,
-      Embed::Ted,
-      Embed::Spotify,
-      Embed::Kickstarter,
-      Embed::Soundcloud,
-      Embed::Default
+      IframeEmbed::Youtube,
+      IframeEmbed::Vimeo,
+      IframeEmbed::Ted,
+      IframeEmbed::Spotify,
+      IframeEmbed::Kickstarter,
+      IframeEmbed::Soundcloud,
+      IframeEmbed::Default
     ]
   end
 
