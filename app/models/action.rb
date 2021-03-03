@@ -107,7 +107,7 @@ class Action < ApplicationRecord
     }
     result = $search[:main].indices.validate_query(options)
     if result["valid"] == false
-      errors[:base] << "Search syntax invalid"
+      errors.add :base, "Search syntax invalid"
     end
   end
 
