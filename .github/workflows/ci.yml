@@ -93,6 +93,7 @@ jobs:
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
+      if: failure()
       with:
         name: screenshots ${{ matrix.os }}-${{ matrix.ruby }}
         path: tmp/screenshots
