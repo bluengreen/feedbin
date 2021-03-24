@@ -92,7 +92,7 @@ jobs:
         bundle exec rails test:system test
 
     - name: Upload artifacts
-    - uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v2
       with:
         name: screenshots ${{ matrix.os }}-${{ matrix.ruby }}
         path: tmp/screenshots
