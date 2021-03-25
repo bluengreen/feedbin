@@ -50,9 +50,14 @@ jobs:
         curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
 
         sudo apt-get update
-        sudo apt-get install --yes openjdk-8-jre elasticsearch libidn11-dev libidn11-dev libpq-dev  \
+
+        sudo apt-get install --yes libidn11-dev libidn11-dev libpq-dev  \
         postgresql-client-11 imagemagick libmagickwand-dev libreadline-dev libxml2-dev libxslt1-dev \
         libcurl4-openssl-dev libssl-dev zlib1g-dev libffi-dev memcached nodejs
+
+        sudo apt-get purge --yes openjdk-11-jre
+
+        sudo apt-get install --yes openjdk-8-jre elasticsearch
 
         java -version
 
