@@ -13,11 +13,11 @@ class SearchIndexRemove
         )
       end
     end
-    Sidekiq::Client.push(
-      "args" => [ids],
-      "class" => "SearchIndexRemoveAlt",
-      "queue" => "worker_slow_search_alt",
-      "retry" => false
-    )
+    # Sidekiq::Client.push(
+    #   "args" => [ids],
+    #   "class" => "SearchIndexRemoveAlt",
+    #   "queue" => "worker_slow_search_alt",
+    #   "retry" => false
+    # )
   end
 end

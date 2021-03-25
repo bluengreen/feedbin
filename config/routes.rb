@@ -1,6 +1,4 @@
 require "sidekiq/web"
-
-Sidekiq::Web.set :session_secret, Rails.application.secrets.secret_key_base
 Sidekiq::Web.app_url = ENV["FEEDBIN_URL"]
 
 Rails.application.routes.draw do
@@ -17,6 +15,8 @@ Rails.application.routes.draw do
   get :version, to: proc { |env| [200, {}, [File.read("REVISION")]] }
   get :subscribe, to: "site#subscribe"
   get :headers, to: "site#headers"
+  get :service_worker, to: "site#service_worker"
+  get "manifest/:theme", to: "site#manifest", as: "manifest"
 
   post "/newsletters" => "newsletters#create"
   get "bookmarklet/:cache_buster", to: "bookmarklet#script", as: "bookmarklet"

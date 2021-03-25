@@ -197,6 +197,7 @@ class EntriesController < ApplicationController
     @user = current_user
     @escaped_query = params[:query].tr("\"", "'").html_safe if params[:query]
 
+    @saved_search_path = new_saved_search_path(query: params[:query])
     @entries = Entry.scoped_search(params, @user)
     @page_query = @entries
     @total_results = @entries.total
@@ -210,7 +211,6 @@ class EntriesController < ApplicationController
 
     @search_message = "Mark #{helpers.number_with_delimiter(@total_results)} #{"article".pluralize(@total_results)} that #{"match".pluralize(@total_results == 1 ? 2 : 1)} the search “#{@escaped_query}” as read?"
 
-    @saved_search_path = new_saved_search_path(query: params[:query])
 
     @collection_title = "Search"
 
@@ -223,10 +223,9 @@ class EntriesController < ApplicationController
 
   def push_view
     user_id = verify_push_token(params[:user])
-    @user = User.find(user_id)
-    @entry = Entry.find(params[:id])
-    UnreadEntry.where(user: @user, entry: @entry).delete_all
-    redirect_to @entry.fully_qualified_url, status: :found
+    user = User.find(user_id)
+    entry = Entry.find(params[:id])
+    redirect_to entry_url(entry), status: :found
   end
 
   def newsletter
@@ -295,17 +294,5 @@ class EntriesController < ApplicationController
       end
     end
     ids
-  end
-
-  def check_for_image(entry, url)
-    response = HTTParty.head(url)
-    if /^image\//.match?(response.headers["content-type"])
-      content = "<img src='#{url}' />"
-      Librato.increment "readability.image_found"
-    else
-      content = nil
-      Librato.increment "readability.parse_fail"
-    end
-    content
   end
 end

@@ -2,6 +2,7 @@ module Searchable
   extend ActiveSupport::Concern
 
   included do
+    include Elasticsearch::Model
 
     UNREAD_REGEX = /(?<=\s|^)is:\s*unread(?=\s|$)/
     READ_REGEX = /(?<=\s|^)is:\s*read(?=\s|$)/
@@ -12,6 +13,40 @@ module Searchable
     TAG_GROUP_REGEX = /tag_id:\((.*?)\)/
     PUBLISHED_REGEX = /published:\(.*?\)|published:\[.*?\]|updated:\(.*?\)|updated:\[.*?\]/
     DATE_UNBOUNDED_REGEX = /published:[<>=+].*?(?=\s|$)|updated:[<>=+].*?(?=\s|$)/
+
+    search_settings = {
+      "number_of_shards": 12,
+      "analysis": {
+        "analyzer": {
+          "lower_exact": {
+            "tokenizer": "whitespace",
+            "filter": ["lowercase"]
+          }
+        }
+      }
+    }
+
+    settings search_settings do
+      mappings _source: {enabled: false} do
+        indexes :id, type: "long", index: :not_analyzed
+        indexes :title, analyzer: "snowball", fields: {exact: {type: "string", analyzer: "lower_exact"}}
+        indexes :content, analyzer: "snowball", fields: {exact: {type: "string", analyzer: "lower_exact"}}
+        indexes :emoji, analyzer: "whitespace", fields: {exact: {type: "string", analyzer: "whitespace"}}
+        indexes :author, analyzer: "lower_exact", fields: {exact: {type: "string", analyzer: "lower_exact"}}
+        indexes :url, analyzer: "keyword", fields: {exact: {type: "string", analyzer: "keyword"}}
+        indexes :feed_id, type: "long", index: :not_analyzed, include_in_all: false
+        indexes :published, type: "date", include_in_all: false
+        indexes :updated, type: "date", include_in_all: false
+        indexes :link, analyzer: "lower_exact"
+
+        indexes :twitter_screen_name, analyzer: "whitespace"
+        indexes :twitter_name, analyzer: "whitespace"
+        indexes :twitter_retweet, type: "boolean"
+        indexes :twitter_media, type: "boolean"
+        indexes :twitter_image, type: "boolean"
+        indexes :twitter_link, type: "boolean"
+      end
+    end
 
     def self.saved_search_count(user)
       saved_searches = user.saved_searches
@@ -26,7 +61,7 @@ module Searchable
         }
 
         if queries.present?
-          result = $search[:main].with {|client| client.msearch(body: queries) }
+          result = Entry.__elasticsearch__.client.msearch body: queries
           entry_ids = result["responses"].map { |response|
             hits = response.dig("hits", "hits") || []
             hits.map do |hit|
@@ -51,7 +86,7 @@ module Searchable
         options[:size] = 50
 
         query = build_query(options)
-        query["_source"] = ["id", "feed_id"]
+        query[:fields] = ["id", "feed_id"]
 
         OpenStruct.new({id: saved_search.id, query: query})
       }.compact
@@ -60,14 +95,8 @@ module Searchable
     def self.scoped_search(params, user)
       options = build_search(params, user)
       query = build_query(options)
-      request = {
-        index: Entry.index_name,
-        body: {
-          query: query[:query]
-        }
-      }
 
-      result = $search[:main].with { |client| client.indices.validate_query(request) }
+      result = $search[:main].indices.validate_query({index: Entry.index_name, body: {query: query[:query]}})
       if result["valid"] == false
         Entry.search(nil).records
       else
@@ -77,7 +106,7 @@ module Searchable
 
     def self.build_query(options)
       {}.tap do |hash|
-        hash["_source"] = ["id"]
+        hash[:fields] = ["id"]
         if options[:sort]
           if %w[desc asc].include?(options[:sort])
             hash[:sort] = [{published: options[:sort]}]
@@ -106,7 +135,7 @@ module Searchable
         if options[:query].present?
           hash[:query][:bool][:must] = {
             query_string: {
-              fields: ["title", "content", "author", "url", "twitter_screen_name", "twitter_name"],
+              fields: ["_all", "title.*", "content.*", "emoji", "author", "url"],
               quote_field_suffix: ".exact",
               default_operator: "AND",
               query: options[:query]

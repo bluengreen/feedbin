@@ -24,6 +24,8 @@ class Feed < ApplicationRecord
 
   enum feed_type: {xml: 0, newsletter: 1, twitter: 2, twitter_home: 3, pages: 4}
 
+  store :settings, accessors: [:custom_icon], coder: JSON
+
   def twitter_user?
     twitter_user.present?
   end
@@ -72,21 +74,19 @@ class Feed < ApplicationRecord
   end
 
   def icon
-    options.dig("json_feed", "icon")
+    options.dig("json_feed", "icon") || custom_icon
   end
 
-  # TODO get last effective url from a feedburner feed
   def self.create_from_parsed_feed(parsed_feed)
-    ActiveRecord::Base.transaction do
-      record = create!(parsed_feed.to_feed)
+    record = parsed_feed.to_feed
+    create_with(record).create_or_find_by!(feed_url: record[:feed_url]).tap do |new_feed|
       parsed_feed.entries.each do |parsed_entry|
         entry_hash = parsed_entry.to_entry
-        threader = Threader.new(entry_hash, record)
+        threader = Threader.new(entry_hash, new_feed)
         unless threader.thread
-          record.entries.create!(entry_hash)
+          new_feed.entries.create_with(entry_hash).create_or_find_by(public_id: entry_hash[:public_id])
         end
       end
-      record
     end
   end
 
@@ -132,7 +132,7 @@ class Feed < ApplicationRecord
       end
     else
       Sidekiq::Client.push_bulk(
-        "args" => [[id, feed_url]],
+        "args" => [[id, feed_url, subscriptions_count]],
         "class" => "FeedDownloaderCritical",
         "queue" => "feed_downloader_critical",
         "retry" => false

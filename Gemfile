@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 git_source(:github) { |name| "https://github.com/#{name}.git" }
 
-gem "rails", "= 6.0.3.2"
+gem "rails", "= 6.0.3.5"
 gem "will_paginate"
 
 gem "http",                github: "feedbin/http",                branch: "feedbin"
@@ -14,6 +14,7 @@ gem "html-pipeline",       github: "feedbin/html-pipeline",       ref: "1e77ecf"
 gem "html_diff",           github: "feedbin/html_diff",           ref: "013e1bb"
 gem "opml_saw",            github: "feedbin/opml_saw",            ref: "61d8c2d"
 gem "twitter",             github: "feedbin/twitter",             branch: "feedbin"
+gem "oauth",               github: "feedbin/oauth-ruby",          branch: "feedbin"
 
 gem "activerecord-import"
 gem "addressable", require: "addressable/uri"
@@ -40,10 +41,7 @@ gem "jbuilder"
 gem "jquery-rails"
 gem "librato-rails", "~> 1.4.2"
 gem "lograge"
-gem "loofah"
-gem "mini_racer"
-gem "oauth"
-gem "patron"
+gem "net-http-persistent"
 gem "pg"
 gem "premailer-rails"
 gem "rack-attack"

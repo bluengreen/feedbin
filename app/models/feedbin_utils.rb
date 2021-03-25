@@ -49,7 +49,7 @@ class FeedbinUtils
       query = query.gsub("body:", "content:")
       query = query.gsub("emoji:", "content:")
 
-      colon_regex = /(?<!title|title.exact|feed_id|content|content.exact|author|_missing_|_exists_|twitter_screen_name|twitter_name|twitter_retweet|twitter_media|twitter_image|twitter_link|url|link):(?=.*)/
+      colon_regex = /(?<!title|title.exact|feed_id|content|content.exact|author|_missing_|_exists_|twitter_screen_name|twitter_name|twitter_retweet|twitter_media|twitter_image|twitter_link|url|link|url.exact):(?=.*)/
       query = query.gsub(colon_regex, '\:')
       query
     end

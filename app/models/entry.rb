@@ -3,7 +3,7 @@ class Entry < ApplicationRecord
 
   attr_accessor :fully_qualified_url, :read, :starred, :skip_mark_as_unread, :skip_recent_post_check
 
-  store :settings, accessors: [:archived_images], coder: JSON
+  store :settings, accessors: [:archived_images, :media_image], coder: JSON
 
   belongs_to :feed
   has_many :unread_entries, dependent: :delete_all
@@ -23,6 +23,7 @@ class Entry < ApplicationRecord
   after_commit :increment_feed_stat, on: :create
   after_commit :touch_feed_last_published_entry, on: :create
   after_commit :harvest_links, on: :create
+  after_commit :harvest_embeds, on: [:create, :update]
   after_commit :cache_views, on: [:create, :update]
   after_commit :save_twitter_users, on: [:create]
 
@@ -107,10 +108,10 @@ class Entry < ApplicationRecord
 
   def strip_trailing_link?
     hash = main_tweet.to_h
-    show_link_preview? && main_tweet.urls.first.indices.last == hash[:full_text].length
+    link_preview? && main_tweet.urls.first.indices.last == hash[:full_text].length
   end
 
-  def show_link_preview?
+  def link_preview?
     return false unless link_tweet?
     return false if image.present?
     return false unless data.dig("saved_pages", main_tweet.urls.first.expanded_url.to_s).present?
@@ -212,7 +213,7 @@ class Entry < ApplicationRecord
   end
 
   def self.entries_list
-    select(:id, :feed_id, :title, :summary, :published, :image, :data, :author, :url, :updated_at)
+    select(:id, :feed_id, :title, :summary, :published, :image, :data, :author, :url, :updated_at, :settings)
   end
 
   def self.include_unread_entries(user_id)
@@ -259,6 +260,12 @@ class Entry < ApplicationRecord
     feed.site_url
   end
 
+  def rebase_url(original_url)
+    base_url = Addressable::URI.heuristic_parse(fully_qualified_url)
+    original_url = Addressable::URI.heuristic_parse(original_url)
+    Addressable::URI.join(base_url, original_url)
+  end
+
   def content_format
     data && data["format"] || "default"
   end
@@ -287,8 +294,8 @@ class Entry < ApplicationRecord
   end
 
   def itunes_image
-    if data && data["itunes_image_processed"]
-      image_url = data["itunes_image_processed"]
+    if media_image || (data && data["itunes_image_processed"])
+      image_url = media_image || data["itunes_image_processed"]
 
       host = ENV["ENTRY_IMAGE_HOST"]
 
@@ -363,6 +370,10 @@ class Entry < ApplicationRecord
     nil
   end
 
+  def youtube?
+    data && data["youtube_video_id"].present?
+  end
+
   private
 
   def base_url
@@ -379,8 +390,8 @@ class Entry < ApplicationRecord
   end
 
   def ensure_published
-    now = DateTime.now
-    if published.nil? || published > now || published.to_i == 0
+    now = Time.now
+    if published.nil? || published > now || published.to_i <= 0
       self.published = now
     end
     true
@@ -460,10 +471,14 @@ class Entry < ApplicationRecord
   end
 
   def find_images
-    EntryImage.perform_async(id)
+    EntryImage.perform_async(public_id)
     if data && data["itunes_image"]
-      ItunesImage.perform_async(id, data["itunes_image"])
+      ItunesImage.perform_async(public_id)
     end
+  end
+
+  def harvest_embeds
+    HarvestEmbeds.perform_async(id)
   end
 
   def harvest_links

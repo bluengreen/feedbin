@@ -5,7 +5,7 @@ class IframeEmbed
 
   def initialize(embed_url)
     @embed_url = URI(embed_url)
-    @embed_url.scheme ||= "http"
+    @embed_url.scheme = "https"
   end
 
   def title
@@ -28,6 +28,15 @@ class IframeEmbed
     data && data["type"]
   end
 
+  # subclass should implement these
+  def channel_name; end
+  def duration; end
+  def profile_image; end
+
+  def cache_key
+    "v1"
+  end
+
   def iframe_src
     url = embed_url.dup
     params = Rack::Utils.parse_nested_query(url.query)
@@ -47,6 +56,9 @@ class IframeEmbed
   def fetch
     if oembed_url
       @data ||= begin
+        Rails.cache.fetch(Digest::SHA1.hexdigest("iframe_embed_counter:#{oembed_params.to_s}")) {
+          Librato.increment("iframe_embed.fetch", source: self.class.name.parameterize)
+        }
         defaults = {
           url: embed_url.to_s
         }
@@ -93,13 +105,13 @@ class IframeEmbed
 
   def self.embed_sources
     [
-      Embed::Youtube,
-      Embed::Vimeo,
-      Embed::Ted,
-      Embed::Spotify,
-      Embed::Kickstarter,
-      Embed::Soundcloud,
-      Embed::Default
+      IframeEmbed::Youtube,
+      IframeEmbed::Vimeo,
+      IframeEmbed::Ted,
+      IframeEmbed::Spotify,
+      IframeEmbed::Kickstarter,
+      IframeEmbed::Soundcloud,
+      IframeEmbed::Default
     ]
   end
 

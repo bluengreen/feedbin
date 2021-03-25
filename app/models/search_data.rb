@@ -7,13 +7,14 @@ class SearchData
     {}.tap do |hash|
       hash[:id]        = @entry.id
       hash[:feed_id]   = @entry.feed_id
-      hash[:title]     = ContentFormatter.summary(@entry.title)
+      hash[:title]     = title
       hash[:url]       = @entry.fully_qualified_url
       hash[:author]    = @entry.author
       hash[:content]   = text
       hash[:published] = @entry.published.iso8601
       hash[:updated]   = @entry.updated_at.iso8601
       hash[:link]      = links
+
       if @entry.tweet?
         hash[:twitter_screen_name] = "#{@entry.main_tweet.user.screen_name} @#{@entry.main_tweet.user.screen_name}"
         hash[:twitter_name]        = @entry.main_tweet.user.name
@@ -31,10 +32,9 @@ class SearchData
   end
 
   def text
-    document
-      .to_text(encode_special_chars: false)
-      .gsub(/\s+/, " ")
-      .squish
+    content = document.to_text(encode_special_chars: false).gsub(/\s+/, " ").squish
+    content = nil if content.empty?
+    content
   end
 
   def tweets
@@ -52,6 +52,12 @@ class SearchData
 
   def twitter_link
     !!(tweets.find { |tweet| tweet.urls? })
+  end
+
+  def title
+    content = ContentFormatter.summary(@entry.title)
+    content = nil if content.empty?
+    content
   end
 
   def links

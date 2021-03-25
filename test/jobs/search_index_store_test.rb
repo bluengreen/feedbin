@@ -38,7 +38,7 @@ class SearchIndexStoreTest < ActiveSupport::TestCase
     Entry.__elasticsearch__.refresh_index!
 
     assert_no_difference "ActionsPerform.jobs.size", +1 do
-      SearchIndexStore.new.perform(@entry.id, true)
+      SearchIndexStore.new.perform("Entry", @entry.id, true)
     end
   end
 end

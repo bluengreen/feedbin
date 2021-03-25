@@ -24,6 +24,8 @@ $.extend feedbin,
   formatMenu: null
   hasShadowDOM: typeof(document.createElement("div").attachShadow) == "function"
   colorHash: new ColorHash
+  scrollStarted: false
+  loadingMore: false
 
   changeContentView: (view) ->
     currentView = $('[data-behavior~=content_option]:not(.hide)')
@@ -38,6 +40,15 @@ $.extend feedbin,
       feedbin.previousContentView = currentView.data('content-option')
       currentView.addClass('hide')
       nextView.removeClass('hide')
+
+  loadMore: () ->
+    if feedbin.scrollStarted == false
+      element = $('.entries')[0]
+      url = $('.pagination .next_page').attr('href')
+      if url && element.scrollHeight <= element.offsetHeight
+        feedbin.loadingMore = true
+        $.getScript url, =>
+          feedbin.loadingMore = false
 
   newsletterLoad: (context) ->
     feedbin.formatImages(context)
@@ -418,17 +429,14 @@ $.extend feedbin,
     if animate
       timeout = 200
       feedbin.panelScrollComplete = false
-      if feedbin.smoothScroll
-        $(containerClass).prop 'scrollLeft', offset
-      else
-        $(containerClass).animate({scrollLeft: offset}, {duration: timeout})
+      $(containerClass).css {'scroll-snap-type': 'unset'} if feedbin.smoothScroll
+      $(containerClass).animate({scrollLeft: offset}, {duration: timeout})
       setTimeout ( ->
         feedbin.panelScrollComplete = true
+        $(containerClass).css {'scroll-snap-type': 'x mandatory'} if feedbin.smoothScroll
       ), timeout
     else
-      $(containerClass).css {'scroll-behavior': 'auto'}
       $(containerClass).prop 'scrollLeft', offset
-      $(containerClass).css {'scroll-behavior': 'smooth'}
 
   showPanel: (panel, state = true) ->
     feedbin.panel = panel
@@ -470,23 +478,30 @@ $.extend feedbin,
     clearTimeout(feedbin.notificationTimeout)
 
     container = $('[data-behavior~=notification_container]')
+    content = $('[data-behavior~=notification_content]')
+
+    if !container.hasClass('shake') && !container.hasClass('hide') && container.hasClass('error') && content.text() == text
+      container.addClass('shake')
+      callback = ->
+        container.removeClass('shake')
+      setTimeout callback, 600
+
     container.removeClass('error')
     container.removeClass('hide')
     container.addClass('visible')
     container.addClass('error') if error
 
-    content = $('[data-behavior~=notification_content]')
     content.text(text)
 
     feedbin.notificationTimeout = setTimeout feedbin.hideNotification, 3000
 
   updateEntries: (entries) ->
-    $('.entries ul').html(entries)
+    $('.entries [data-behavior~=entries_target]').html(entries)
     $('.entries').prop('scrollTop', 0)
     $(".entries").removeClass("loading");
 
   appendEntries: (entries) ->
-    $('.entries ul').append(entries)
+    $('.entries [data-behavior~=entries_target]').append(entries)
 
   formatEntries: ->
     $(document).trigger('feedbin:entriesLoaded')
@@ -678,9 +693,11 @@ $.extend feedbin,
       date = new Date(date)
       $(@).text(date.format("%B %e, %Y at %l:%M %p"))
 
-  applyUserTitles: ->
+  applyUserTitles: (cached = true) ->
     textarea = document.createElement("textarea")
-    $('[data-behavior~=user_title]').each ->
+    selector = '[data-behavior~=user_title]'
+    selector = "#{selector}:not(.renamed)" if cached
+    $(selector).each ->
       element = $(@)
       feed = element.data('feed-id')
       if (feed of feedbin.data.user_titles)
@@ -700,6 +717,7 @@ $.extend feedbin,
         jumpable = element.data('jumpable')
         jumpable["title"] = newTitle
         element.data('jumpable', jumpable)
+      element.addClass('renamed')
 
   queryString: (name) ->
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]")
@@ -1004,8 +1022,8 @@ $.extend feedbin,
     return if feedbin.selectedEntry.container == null
     next = feedbin.selectedEntry.container.parents('li').next()
     if next.length
-      title = next.find('.title').text()
-      feed = next.find('.feed-title').text()
+      title = next.find('.title').first().text()
+      feed = next.find('.feed-title').first().text()
       $('.next-entry-title').text(title)
       $('.next-entry-feed').text(feed)
       $('[data-behavior~=needs_next]').prop('disabled', false)
@@ -1267,12 +1285,27 @@ $.extend feedbin,
     $('.modal-purpose-subscribe .modal-body, .modal-purpose-subscribe .modal-footer').hide()
     $('.modal-purpose-subscribe .modal-dialog').removeClass('done');
     $('[data-behavior~=feeds_search_favicon_target]').html('')
+    $('.modal-purpose-subscribe [data-behavior~=subscribe_target]').html('')
 
   showSubscribeResults: ->
     $('.modal-purpose-subscribe .modal-body, .modal-purpose-subscribe .modal-footer').slideDown(200)
     $('.modal-purpose-subscribe .modal-dialog').addClass('done');
     $('.modal-purpose-subscribe [data-behavior~=submit_add]').removeAttr('disabled');
     $('.modal-purpose-subscribe .title').first().find("input").focus();
+    $('.modal-purpose-subscribe .password-footer').addClass('hide')
+    $('.modal-purpose-subscribe .subscribe-footer').removeClass('hide')
+
+  showAuthField: (html) ->
+    $('.modal-purpose-subscribe [data-behavior~=subscribe_target]').html(html);
+    $('.modal-purpose-subscribe .modal-body, .modal-purpose-subscribe .modal-footer').slideDown(200)
+    $('.modal-purpose-subscribe .modal-dialog').addClass('done');
+    $('.modal-purpose-subscribe .password-footer').removeClass('hide')
+    $('.modal-purpose-subscribe .subscribe-footer').addClass('hide')
+    window.history.replaceState({}, document.title, "/");
+
+  basicAuthForm: ->
+    $('.modal-purpose-subscribe [data-behavior~=submit_add]').removeAttr('disabled')
+    $('.modal-purpose-subscribe #basic_username').focus()
 
   showModal: (target, title = null) ->
     modal = $("#modal")
@@ -1298,7 +1331,6 @@ $.extend feedbin,
   loadLink: (href) ->
     feedbin.showModal("view_link");
     $.get(feedbin.data.modal_extracts_path, {url: href});
-    $('.entry-final-content a [data-behavior~=link_actions]').remove()
 
   updateFeedSearchMessage: ->
     length = $('[data-behavior~=subscription_option] [data-behavior~=check_toggle]:checked').length
@@ -1492,28 +1524,23 @@ $.extend feedbin,
           form.append(input)
           form.append(methodInput)
 
-          title.addClass('hide')
-          target.append(form)
+          target.closest('li').append(form)
+
           input.select()
+
+      $(document).on 'submit', '[data-behavior~=rename_form]', (event, xhr) ->
+        input = $(@).find('[data-behavior~=rename_input]')
+        container = $(@).closest('li').find('> [data-behavior~=renamable]')
+        title = container.find('[data-behavior~=rename_title]')
+        target = container.find('[data-behavior~=rename_target]')
+        target.data('title', input.val())
+        title.text(input.val())
+        $('[data-behavior~=rename_form]').remove()
+        $('[data-behavior~=rename_title]').removeClass('hide')
 
       $(document).on 'blur', '[data-behavior~=rename_input]', (event) ->
         $('[data-behavior~=rename_form]').remove()
         $('[data-behavior~=rename_title]').removeClass('hide')
-
-      $(document).on 'submit', '[data-behavior~=rename_form]', (event, xhr) ->
-        container = $(@).closest('[data-behavior~=renamable]')
-        title = container.find('[data-behavior~=rename_title]')
-        input = container.find('[data-behavior~=rename_input]')
-        target = container.find('[data-behavior~=rename_target]')
-        target.data('title', input.val())
-        title.text(input.val())
-
-        $('[data-behavior~=rename_form]').remove()
-        $('[data-behavior~=rename_title]').removeClass('hide')
-
-      $(document).on 'click', '[data-behavior~=rename_input]', (event) ->
-        event.stopPropagation()
-        event.preventDefault()
 
       $(document).on 'click', '[data-behavior~=open_item]', (event) ->
         unless $(event.target).is('[data-behavior~=rename_input]')
@@ -1676,9 +1703,13 @@ $.extend feedbin,
 
     entriesLoading: ->
       $(document).on 'click', '[data-behavior~=feed_link]', (event) ->
+        feedId = $(@).data('feed-id')
         $(".entries").addClass("loading")
         title = $(".collection-label-wrap", @).text()
-        $("[data-behavior~=entries_header] .feed-title-wrap").text(title)
+        titleContainer = $("[data-behavior~=entries_header] .feed-title-wrap [data-behavior~=user_title]")
+        titleContainer.text(title)
+        if feedId
+          titleContainer.data('feed-id', feedId)
         true
 
     feedSelected: ->
@@ -1721,6 +1752,7 @@ $.extend feedbin,
           menu.addClass('hide')
 
       $(document).on 'click', '[data-behavior~=show_format_menu]', (event) ->
+        $('.dropdown-wrap.open').removeClass('open')
         button = $(event.currentTarget)
         menu = $('.format-palette')
         if feedbin.formatMenu
@@ -1748,12 +1780,16 @@ $.extend feedbin,
 
     linkActions: ->
       $(document).on 'click', '[data-behavior~=add_to_pages]', (event) ->
-        href = $(@).parents("a:first").attr('href')
+        tooltip = $(@).closest("[data-behavior~=link_actions]")
+        tooltip.addClass('hide')
+        href = tooltip.data('url')
         $.post(feedbin.data.pages_internal_path, {url: href});
         event.preventDefault()
 
       $(document).on 'click', '[data-behavior~=view_link]', (event) ->
-        href = $(@).parents("a:first").attr('href')
+        tooltip = $(@).closest("[data-behavior~=link_actions]")
+        tooltip.addClass('hide')
+        href = tooltip.data('url')
         if feedbin.data.view_links_in_app
           window.open(href, '_blank');
         else
@@ -2034,6 +2070,8 @@ $.extend feedbin,
         if !$('body').hasClass('full-screen')
           feedbin.scrollToPanel('.entries-column', false)
           window.history.replaceState({}, "", "/");
+          document.title = "Feedbin"
+          feedbin.updateTitle()
         feedbin.measureEntryColumn()
         feedbin.setNativeBorders()
 
@@ -2069,6 +2107,7 @@ $.extend feedbin,
         return
 
       $(document).on 'click', '[data-behavior~=show_entry_content]', (event) ->
+        $('.dropdown-wrap.open').removeClass('open')
         unless $(event.target).is('[data-behavior~=show_entry_actions]')
           $('.entries li').removeClass('show-actions')
         return
@@ -2312,40 +2351,74 @@ $.extend feedbin,
         feedbin.updateFeedSearchMessage()
 
     linkActionsHover: ->
+      cacheLink = (url) ->
+        form = $("[data-behavior~=extract_cache_form]")
+        $("#url", form).val(url)
+        form.submit()
+
+      hideLinkActions = (url) ->
+          hideTooltip = ->
+            if url of feedbin.linkActions
+              tooltip = feedbin.linkActions[url].tooltip
+              if url of feedbin.linkActions && !tooltip.is(':hover')
+                tooltip.addClass('hide')
+                tooltip.removeClass('open')
+                tooltip.remove()
+                feedbin.linkActions[url].popper.destroy() if feedbin.linkActions[url].popper
+                delete feedbin.linkActions[url]
+
+          feedbin.linkActions[url].linkMenuTimer = setTimeout hideTooltip, 350
+
+      showLinkActions = (url, link) ->
+        if url of feedbin.linkActions && !feedbin.linkActions[url].visible
+          tooltip = feedbin.linkActions[url].tooltip
+          $('body').append(tooltip)
+          tooltip.removeClass('hide')
+          position = link[0].getClientRects()
+          lastLine = position[position.length - 1]
+          offset = (lastLine.width + tooltip.outerWidth()) * -1
+          options =
+            placement: 'right-end'
+            modifiers:
+              preventOverflow:
+                enabled: false
+              offset:
+                offset: "-2, #{offset}"
+
+          feedbin.linkActions[url].visible = true
+          feedbin.linkActions[url].popper = new Popper(link, tooltip, options)
+
+      $(document).on 'mouseleave', '[data-behavior~=link_actions]', (event) ->
+        hideLinkActions($(@).data('url'))
+
       $(document).on 'mouseenter mouseleave', 'body:not(.touch) .entry-final-content a', (event) ->
         link = $(@)
-        if link.text().trim().length > 0 && !$(@).has('.mejs__container').length > 0 && !link.closest(".system-content").length
+        if link.text().trim().length > 0 && !$(@).has('.mejs__container').length > 0 && !link.closest(".system-content").length && !link.closest(".bigfoot-footnote").length
           url = link.attr('href')
+          tooltip = $('[data-behavior~=link_actions_template] [data-behavior~=link_actions]').clone()
+          tooltip.data('url', url)
 
           unless url of feedbin.linkActions
             feedbin.linkActions[url] =
               linkActionsTimer: null
               linkCacheTimer: null
               linkMenuTimer: null
+              linkMenuCleanup: null
+              visible: false
+              popper: null
+              tooltip: tooltip
 
           clearTimeout(feedbin.linkActions[url].linkActionsTimer)
           clearTimeout(feedbin.linkActions[url].linkCacheTimer)
           clearTimeout(feedbin.linkActions[url].linkMenuTimer)
+          clearTimeout(feedbin.linkActions[url].linkMenuCleanup)
 
           if event.type == "mouseleave"
-            feedbin.linkActions[url].linkMenuTimer = setTimeout ( ->
-              $('.entry-final-content a [data-behavior~=link_actions]').remove()
-              delete feedbin.linkActions[url]
-            ), 350
+            hideLinkActions(url)
 
           if event.type == "mouseenter"
-            feedbin.linkActions[url].linkCacheTimer = setTimeout ( ->
-              form = $("[data-behavior~=extract_cache_form]")
-              $("#url", form).val(url)
-              form.submit()
-            ), 100
-            feedbin.linkActions[url].linkActionsTimer = setTimeout ( ->
-              actionsVisible = link.find('[data-behavior~=link_actions]').length > 0
-              if !actionsVisible
-                contents = $('[data-behavior~=link_actions]').clone()
-                contents = contents[0].outerHTML
-                link.append(contents)
-            ), 400
+            feedbin.linkActions[url].linkCacheTimer = setTimeout((-> cacheLink(url)), 100)
+            feedbin.linkActions[url].linkActionsTimer = setTimeout((-> showLinkActions(url, link)), 400)
 
     loadLinksInApp: ->
       $(document).on 'click', '[data-behavior~=entry_final_content] a', (event) ->
@@ -2661,6 +2734,46 @@ $.extend feedbin,
         newText = button.data('toggle-text')
         button.text(newText)
         button.data('toggle-text', text)
+
+    scrollStarted: ->
+      $(document).on 'click', '[data-behavior~=show_entries]', (event) ->
+        feedbin.scrollStarted = false
+
+    dataTooltip: ->
+      $(document).on 'mouseout', '[data-behavior~=hide_tooltip]', (event) ->
+        target = event.currentTarget
+        controller = $(target).closest('[data-behavior~=tooltip_controller]')
+        tooltipTarget = $('[data-behavior~=tooltip_target]', controller)
+        tooltipTarget.addClass("hide")
+
+      $(document).on 'mouseover', '[data-behavior~=show_tooltip]', (event) ->
+        bar = event.currentTarget
+        parentWidth = bar.offsetParent.offsetWidth
+
+        controller = $(bar).closest('[data-behavior~=tooltip_controller]')
+        tooltipTarget = $('[data-behavior~=tooltip_target]', controller)
+        dayTarget = $('[data-behavior~=tooltip_day]', tooltipTarget)
+        countTarget = $('[data-behavior~=tooltip_count]', tooltipTarget)
+
+        tooltipTarget.removeClass('hide')
+        dayTarget.text(bar.dataset.day)
+        countTarget.text(bar.dataset.count)
+
+        topOffset = tooltipTarget.prop("offsetHeight") + 4
+
+        tooltipTarget.css
+          top: "#{-topOffset}px"
+          right: 'auto'
+          left: 'auto'
+
+        if bar.offsetLeft < parentWidth / 2
+          tooltipTarget.removeClass("right")
+          tooltipTarget.css
+            left: "#{bar.offsetLeft - 14}px"
+        else
+          tooltipTarget.addClass("right")
+          tooltipTarget.css
+            right: "#{parentWidth - bar.offsetLeft - 18}px"
 
     copy: ->
       $(document).on 'click', '[data-behavior~=copy]', (event) ->
