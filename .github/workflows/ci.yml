@@ -44,45 +44,46 @@ jobs:
     - name: Install system dependencies
       run: |
         set -eux
+
         sudo gem install bundler
+
         wget --quiet --output-document - https://packages.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
         echo "deb http://packages.elastic.co/elasticsearch/2.x/debian stable main" | sudo tee /etc/apt/sources.list.d/elasticsearch-2.x.list
 
         curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
 
-        sudo apt-get update --quiet
+        sudo apt-get update
 
-        sudo apt-get remove --quiet adoptopenjdk-11-hotspot
+        sudo apt-get remove adoptopenjdk-11-hotspot
 
-        sudo apt-get install --yes \
-        adoptopenjdk-8-hotspot     \
-        elasticsearch              \
-        imagemagick                \
-        libcurl4-openssl-dev       \
-        libffi-dev                 \
-        libidn11-dev               \
-        libmagickwand-dev          \
-        libpq-dev                  \
-        libreadline-dev            \
-        libssl-dev                 \
-        libxml2-dev                \
-        libxslt1-dev               \
-        memcached                  \
-        nodejs                     \
-        postgresql-client-11       \
+        sudo apt-get install --quiet --yes \
+        adoptopenjdk-8-hotspot             \
+        elasticsearch                      \
+        imagemagick                        \
+        libcurl4-openssl-dev               \
+        libffi-dev                         \
+        libidn11-dev                       \
+        libmagickwand-dev                  \
+        libpq-dev                          \
+        libreadline-dev                    \
+        libssl-dev                         \
+        libxml2-dev                        \
+        libxslt1-dev                       \
+        memcached                          \
+        nodejs                             \
+        postgresql-client-11               \
         zlib1g-dev
 
         sudo systemctl start elasticsearch
 
-        sudo wget --quiet "https://chromedriver.storage.googleapis.com/2.36/chromedriver_linux64.zip" --output-document /tmp/chromedriver.zip
-        sudo unzip /tmp/chromedriver.zip -d /tmp/
+
+        chromedriver_version=$(curl https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
+        wget --quiet "https://chromedriver.storage.googleapis.com/${chromedriver_version}/chromedriver_linux64.zip" --output-document /tmp/chromedriver.zip
+        unzip /tmp/chromedriver.zip -d /tmp/
         sudo mv /tmp/chromedriver /usr/local/bin/
 
-        sudo wget --quiet "https://feedbin-ci.s3.amazonaws.com/kindlegen/kindlegen" --output-document /tmp/kindlegen
-        sudo mv /tmp/kindlegen /usr/local/bin/
+        sudo wget --quiet "https://feedbin-ci.s3.amazonaws.com/kindlegen/kindlegen" --output-document /usr/local/bin/kindlegen
         sudo chmod +x /usr/local/bin/kindlegen
-
-        sudo systemctl status elasticsearch
 
       if: matrix.os == 'ubuntu-18.04' || matrix.os == 'ubuntu-20.04'
 
