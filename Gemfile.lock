@@ -37,7 +37,7 @@ GIT
 
 GIT
   remote: https://github.com/feedbin/feedkit.git
-  revision: 3bfb58277849c83c459ef1878100e179d5f0902d
+  revision: 7244039d7ba9eca954b4d613c712364023a6206a
   branch: master
   specs:
     feedkit (0.1.0)
@@ -200,12 +200,12 @@ GEM
       rack (>= 0.9.0)
     binding_of_caller (1.0.0)
       debug_inspector (>= 0.0.1)
-    bootsnap (1.7.2)
+    bootsnap (1.7.3)
       msgpack (~> 1.0)
     buftok (0.2.0)
     builder (3.2.4)
     byebug (11.1.3)
-    capistrano (3.15.0)
+    capistrano (3.16.0)
       airbrussh (>= 1.0.0)
       i18n
       rake (>= 10.0.0)
@@ -258,7 +258,7 @@ GEM
       addressable
     curb (0.9.11)
     dante (0.2.0)
-    debug_inspector (1.0.0)
+    debug_inspector (1.1.0)
     docile (1.3.5)
     domain_name (0.5.20190701)
       unf (>= 0.0.5, < 1.0.0)
@@ -282,17 +282,17 @@ GEM
       oauth (>= 0.4.1)
     excon (0.79.0)
     execjs (2.7.0)
-    faker (2.16.0)
+    faker (2.17.0)
       i18n (>= 1.6, < 2)
     faraday (0.17.4)
       multipart-post (>= 1.2, < 3)
     faraday_middleware (0.14.0)
       faraday (>= 0.7.4, < 1.0)
-    ffi (1.14.2)
+    ffi (1.15.0)
     ffi-compiler (1.0.1)
       ffi (>= 1.0.0)
       rake
-    fog-aws (3.8.0)
+    fog-aws (3.10.0)
       fog-core (~> 2.1)
       fog-json (~> 1.1)
       fog-xml (~> 0.1)
@@ -315,7 +315,7 @@ GEM
     hashdiff (1.0.1)
     hashie (4.1.0)
     hetchy (1.0.0)
-    honeybadger (4.7.3)
+    honeybadger (4.8.0)
     htmlbeautifier (1.3.1)
     htmlentities (4.3.4)
     http-2 (0.11.0)
@@ -354,10 +354,7 @@ GEM
       activesupport (>= 3.0)
       librato-rack (~> 1.1.0)
       railties (>= 3.0)
-    libv8 (8.4.255.0)
-    libv8 (8.4.255.0-x86_64-darwin-20)
-    libv8 (8.4.255.0-x86_64-linux)
-    listen (3.4.1)
+    listen (3.5.0)
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
     lograge (0.11.2)
@@ -378,7 +375,8 @@ GEM
     mime-types (3.3.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2021.0225)
-    mimemagic (0.3.5)
+    mimemagic (0.3.8)
+      nokogiri (~> 1)
     mini_magick (4.11.0)
     mini_mime (1.0.2)
     mini_portile2 (2.5.0)
@@ -397,15 +395,15 @@ GEM
     net-scp (3.0.0)
       net-ssh (>= 2.6.5, < 7.0.0)
     net-ssh (6.1.0)
-    nio4r (2.5.5)
-    nokogiri (1.11.1)
+    nio4r (2.5.7)
+    nokogiri (1.11.2)
       mini_portile2 (~> 2.5.0)
       racc (~> 1.4)
-    nokogiri (1.11.1-x86_64-darwin)
+    nokogiri (1.11.2-x86_64-darwin)
       racc (~> 1.4)
-    nokogiri (1.11.1-x86_64-linux)
+    nokogiri (1.11.2-x86_64-linux)
       racc (~> 1.4)
-    nokogumbo (2.0.4)
+    nokogumbo (2.0.5)
       nokogiri (~> 1.8, >= 1.8.4)
     parallel (1.20.1)
     parser (3.0.0.0)
@@ -419,7 +417,7 @@ GEM
       actionmailer (>= 3)
       premailer (~> 1.7, >= 1.7.9)
     public_suffix (4.0.6)
-    puma (5.2.1)
+    puma (5.2.2)
       nio4r (~> 2.0)
     racc (1.5.2)
     rack (2.2.3)
@@ -476,7 +474,7 @@ GEM
       nokogiri
     rexml (3.2.4)
     rmagick (4.2.2)
-    rubocop (1.10.0)
+    rubocop (1.11.0)
       parallel (~> 1.10)
       parser (>= 3.0.0.0)
       rainbow (>= 2.2.2, < 4.0)
@@ -487,12 +485,12 @@ GEM
       unicode-display_width (>= 1.4.0, < 3.0)
     rubocop-ast (1.4.1)
       parser (>= 2.7.1.5)
-    rubocop-performance (1.9.2)
+    rubocop-performance (1.10.1)
       rubocop (>= 0.90.0, < 2.0)
       rubocop-ast (>= 0.4.0)
     ruby-progressbar (1.11.0)
-    ruby-vips (2.0.17)
-      ffi (~> 1.9)
+    ruby-vips (2.1.0)
+      ffi (~> 1.12)
     rubyzip (2.3.0)
     sanitize (5.2.3)
       crass (~> 1.0.2)
@@ -512,7 +510,7 @@ GEM
     selenium-webdriver (3.142.7)
       childprocess (>= 0.5, < 4.0)
       rubyzip (>= 1.2.2)
-    sidekiq (6.1.3)
+    sidekiq (6.2.0)
       connection_pool (>= 2.2.2)
       rack (~> 2.0)
       redis (>= 4.2.0)
@@ -535,9 +533,9 @@ GEM
       net-scp (>= 1.1.2)
       net-ssh (>= 2.8.0)
     ssrf_filter (1.0.7)
-    standard (0.13.0)
-      rubocop (= 1.10.0)
-      rubocop-performance (= 1.9.2)
+    standard (1.0.4)
+      rubocop (= 1.11.0)
+      rubocop-performance (= 1.10.1)
     stripe (4.24.0)
       faraday (~> 0.13)
       net-http-persistent (~> 3.0)
@@ -570,7 +568,7 @@ GEM
     unicode-emoji (2.7.1)
       unicode-version (~> 1.0)
     unicode-version (1.1.0)
-    unicorn (5.8.0)
+    unicorn (6.0.0)
       kgio (~> 2.6)
       raindrops (~> 0.7)
     webmock (3.8.0)
@@ -636,7 +634,6 @@ DEPENDENCIES
   librato-rails (~> 1.4.2)
   listen
   lograge
-  mini_racer
   minitest
   minitest-stub-const
   minitest-stub_any_instance
@@ -675,4 +672,4 @@ DEPENDENCIES
   will_paginate
 
 BUNDLED WITH
-   2.2.3
+   2.2.15
