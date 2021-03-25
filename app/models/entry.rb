@@ -3,7 +3,7 @@ class Entry < ApplicationRecord
 
   attr_accessor :fully_qualified_url, :read, :starred, :skip_mark_as_unread, :skip_recent_post_check
 
-  store :settings, accessors: [:archived_images], coder: JSON
+  store :settings, accessors: [:archived_images, :media_image], coder: JSON
 
   belongs_to :feed
   has_many :unread_entries, dependent: :delete_all
@@ -24,7 +24,6 @@ class Entry < ApplicationRecord
   after_commit :touch_feed_last_published_entry, on: :create
   after_commit :harvest_links, on: :create
   after_commit :harvest_embeds, on: [:create, :update]
-  after_commit :cache_extracted_content, on: :create
   after_commit :cache_views, on: [:create, :update]
   after_commit :save_twitter_users, on: [:create]
 
@@ -261,6 +260,12 @@ class Entry < ApplicationRecord
     feed.site_url
   end
 
+  def rebase_url(original_url)
+    base_url = Addressable::URI.heuristic_parse(fully_qualified_url)
+    original_url = Addressable::URI.heuristic_parse(original_url)
+    Addressable::URI.join(base_url, original_url)
+  end
+
   def content_format
     data && data["format"] || "default"
   end
@@ -289,8 +294,8 @@ class Entry < ApplicationRecord
   end
 
   def itunes_image
-    if data && data["itunes_image_processed"]
-      image_url = data["itunes_image_processed"]
+    if media_image || (data && data["itunes_image_processed"])
+      image_url = media_image || data["itunes_image_processed"]
 
       host = ENV["ENTRY_IMAGE_HOST"]
 
@@ -363,6 +368,10 @@ class Entry < ApplicationRecord
     URI(url).host
   rescue
     nil
+  end
+
+  def youtube?
+    data && data["youtube_video_id"].present?
   end
 
   private
@@ -462,9 +471,9 @@ class Entry < ApplicationRecord
   end
 
   def find_images
-    EntryImage.perform_async(id)
+    EntryImage.perform_async(public_id)
     if data && data["itunes_image"]
-      ItunesImage.perform_async(id, data["itunes_image"])
+      ItunesImage.perform_async(public_id)
     end
   end
 
@@ -474,10 +483,6 @@ class Entry < ApplicationRecord
 
   def harvest_links
     HarvestLinks.perform_async(id) if tweet?
-  end
-
-  def cache_extracted_content
-    CacheExtractedContent.perform_async(id, feed_id)
   end
 
   def cache_views
