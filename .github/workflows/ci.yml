@@ -43,6 +43,7 @@ jobs:
 
     - name: Install system dependencies
       run: |
+        set -eux
         sudo gem install bundler
         wget --quiet --output-document - https://packages.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
         echo "deb http://packages.elastic.co/elasticsearch/2.x/debian stable main" | sudo tee /etc/apt/sources.list.d/elasticsearch-2.x.list
@@ -53,6 +54,10 @@ jobs:
         echo "deb [arch=amd64] https://apt.bell-sw.com/ stable main" | sudo tee /etc/apt/sources.list.d/bellsoft.list
 
         sudo apt-get update
+
+        java -version
+
+        sudo apt remove openjdk-11-jre-headless openjdk-11-jre openjdk-11-jdk-headless openjdk-11-jdk
 
         sudo apt-get install --yes \
         bellsoft-java8             \
