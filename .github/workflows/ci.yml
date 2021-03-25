@@ -54,6 +54,8 @@ jobs:
         postgresql-client-11 imagemagick libmagickwand-dev libreadline-dev libxml2-dev libxslt1-dev \
         libcurl4-openssl-dev libssl-dev zlib1g-dev libffi-dev memcached nodejs
 
+        java -version
+
         sudo systemctl start elasticsearch
 
         sudo wget "https://chromedriver.storage.googleapis.com/2.36/chromedriver_linux64.zip" -O /tmp/chromedriver.zip
