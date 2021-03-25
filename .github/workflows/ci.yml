@@ -50,19 +50,12 @@ jobs:
 
         curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
 
-        wget --quiet --output-document - https://download.bell-sw.com/pki/GPG-KEY-bellsoft | sudo apt-key add -
-        echo "deb [arch=amd64] https://apt.bell-sw.com/ stable main" | sudo tee /etc/apt/sources.list.d/bellsoft.list
+        sudo apt-get update --quiet
 
-        sudo apt-get update
-
-        java -version
-
-        sudo apt remove adoptopenjdk-11-hotspot
-
-        java -version
+        sudo apt-get remove --quiet adoptopenjdk-11-hotspot
 
         sudo apt-get install --yes \
-        bellsoft-java8             \
+        adoptopenjdk-8-hotspot     \
         elasticsearch              \
         imagemagick                \
         libcurl4-openssl-dev       \
@@ -78,8 +71,6 @@ jobs:
         nodejs                     \
         postgresql-client-11       \
         zlib1g-dev
-
-        java -version
 
         sudo systemctl start elasticsearch
 
@@ -105,7 +96,7 @@ jobs:
     - name: bundle install
       run: |
         bundle config path vendor/bundle
-        bundle install --jobs 4
+        bundle install --jobs 2
 
     - name: Build and test with Rake
       env:
