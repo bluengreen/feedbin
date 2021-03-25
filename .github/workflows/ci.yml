@@ -7,8 +7,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-18.04, ubuntu-20.04]
-        ruby: [2.6, 2.7]
+        os: [ubuntu-20.04]
+        ruby: [2.7]
 
     runs-on: ${{ matrix.os }}
 
@@ -58,7 +58,9 @@ jobs:
 
         java -version
 
-        sudo apt remove openjdk-11-jre-headless openjdk-11-jre openjdk-11-jdk-headless openjdk-11-jdk
+        sudo apt remove adoptopenjdk-11-hotspot
+
+        java -version
 
         sudo apt-get install --yes \
         bellsoft-java8             \
