@@ -54,6 +54,8 @@ jobs:
         postgresql-client-11 imagemagick libmagickwand-dev libreadline-dev libxml2-dev libxslt1-dev \
         libcurl4-openssl-dev libssl-dev zlib1g-dev libffi-dev memcached nodejs
 
+        sudo systemctl start elasticsearch
+
         sudo wget "https://chromedriver.storage.googleapis.com/2.36/chromedriver_linux64.zip" -O /tmp/chromedriver.zip
         sudo unzip /tmp/chromedriver.zip -d /tmp/
         sudo mv /tmp/chromedriver /usr/local/bin/
@@ -62,7 +64,7 @@ jobs:
         sudo mv /tmp/kindlegen /usr/local/bin/
         sudo chmod +x /usr/local/bin/kindlegen
 
-        sudo systemctl start elasticsearch
+        curl localhost:9200
 
       if: matrix.os == 'ubuntu-18.04' || matrix.os == 'ubuntu-20.04'
 
