@@ -64,7 +64,7 @@ jobs:
         sudo mv /tmp/kindlegen /usr/local/bin/
         sudo chmod +x /usr/local/bin/kindlegen
 
-        curl localhost:9200
+        sudo systemctl status elasticsearch
 
       if: matrix.os == 'ubuntu-18.04' || matrix.os == 'ubuntu-20.04'
 
