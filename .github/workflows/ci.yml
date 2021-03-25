@@ -44,30 +44,43 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo gem install bundler
-        sudo wget -qO - https://packages.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+        wget --quiet --output-document - https://packages.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
         echo "deb http://packages.elastic.co/elasticsearch/2.x/debian stable main" | sudo tee /etc/apt/sources.list.d/elasticsearch-2.x.list
 
         curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
 
+        wget --quiet --output-document - https://download.bell-sw.com/pki/GPG-KEY-bellsoft | sudo apt-key add -
+        echo "deb [arch=amd64] https://apt.bell-sw.com/ stable main" | sudo tee /etc/apt/sources.list.d/bellsoft.list
+
         sudo apt-get update
 
-        sudo apt-get install --yes libidn11-dev libidn11-dev libpq-dev  \
-        postgresql-client-11 imagemagick libmagickwand-dev libreadline-dev libxml2-dev libxslt1-dev \
-        libcurl4-openssl-dev libssl-dev zlib1g-dev libffi-dev memcached nodejs
-
-        sudo apt-get purge --yes openjdk-11-jre
-
-        sudo apt-get install --yes openjdk-8-jre elasticsearch
+        sudo apt-get install --yes \
+        bellsoft-java8             \
+        elasticsearch              \
+        imagemagick                \
+        libcurl4-openssl-dev       \
+        libffi-dev                 \
+        libidn11-dev               \
+        libmagickwand-dev          \
+        libpq-dev                  \
+        libreadline-dev            \
+        libssl-dev                 \
+        libxml2-dev                \
+        libxslt1-dev               \
+        memcached                  \
+        nodejs                     \
+        postgresql-client-11       \
+        zlib1g-dev
 
         java -version
 
         sudo systemctl start elasticsearch
 
-        sudo wget "https://chromedriver.storage.googleapis.com/2.36/chromedriver_linux64.zip" -O /tmp/chromedriver.zip
+        sudo wget --quiet "https://chromedriver.storage.googleapis.com/2.36/chromedriver_linux64.zip" --output-document /tmp/chromedriver.zip
         sudo unzip /tmp/chromedriver.zip -d /tmp/
         sudo mv /tmp/chromedriver /usr/local/bin/
 
-        sudo wget "https://feedbin-ci.s3.amazonaws.com/kindlegen/kindlegen" -O /tmp/kindlegen
+        sudo wget --quiet "https://feedbin-ci.s3.amazonaws.com/kindlegen/kindlegen" --output-document /tmp/kindlegen
         sudo mv /tmp/kindlegen /usr/local/bin/
         sudo chmod +x /usr/local/bin/kindlegen
 
