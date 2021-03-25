@@ -53,7 +53,6 @@ jobs:
         sudo apt-get install --yes openjdk-8-jre elasticsearch libidn11-dev libidn11-dev libpq-dev  \
         postgresql-client-11 imagemagick libmagickwand-dev libreadline-dev libxml2-dev libxslt1-dev \
         libcurl4-openssl-dev libssl-dev zlib1g-dev libffi-dev memcached nodejs
-        sudo service elasticsearch restart
 
         sudo wget "https://chromedriver.storage.googleapis.com/2.36/chromedriver_linux64.zip" -O /tmp/chromedriver.zip
         sudo unzip /tmp/chromedriver.zip -d /tmp/
@@ -62,6 +61,8 @@ jobs:
         sudo wget "https://feedbin-ci.s3.amazonaws.com/kindlegen/kindlegen" -O /tmp/kindlegen
         sudo mv /tmp/kindlegen /usr/local/bin/
         sudo chmod +x /usr/local/bin/kindlegen
+
+        sudo systemctl start elasticsearch
 
       if: matrix.os == 'ubuntu-18.04' || matrix.os == 'ubuntu-20.04'
 
