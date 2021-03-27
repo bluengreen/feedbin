@@ -1,10 +1,11 @@
 source "https://rubygems.org"
 git_source(:github) { |name| "https://github.com/#{name}.git" }
 
-gem "rails", "= 6.1.3"
+gem "rails", "= 6.1.3.1"
 gem "will_paginate"
 
 gem "http",                github: "feedbin/http",                branch: "feedbin"
+gem "carrierwave",         github: "feedbin/carrierwave",         branch: "feedbin"
 gem "carrierwave_direct",  github: "feedbin/carrierwave_direct",  ref: "a0bc323"
 gem "dalli",               github: "feedbin/dalli",               branch: "feedbin"
 gem "feedjira",            github: "feedbin/feedjira",            branch: "f2"
@@ -24,7 +25,6 @@ gem "autoprefixer-rails"
 gem "bcrypt"
 gem "bcrypt-ruby"
 gem "bootsnap", require: false
-gem "carrierwave"
 gem "clockwork"
 gem "coffee-rails"
 gem "connection_pool"
