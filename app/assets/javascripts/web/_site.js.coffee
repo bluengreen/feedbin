@@ -27,6 +27,54 @@ $.extend feedbin,
   scrollStarted: false
   loadingMore: false
 
+  prepareShareMenu: ->
+    services = [].concat(feedbin.data.sharing)
+
+    if "share" of navigator
+      if services.length > 0
+        services.unshift({url: '#', label: "Share using…", html_options: {"data-behavior": "navigator_share"}})
+      else
+        $('[data-behavior~=toggle_share_menu]').attr("data-behavior", "navigator_share")
+    else if services.length == 0
+      services.unshift({url: feedbin.data.sharing_path, label: "Configure…"})
+
+    if services.length > 0
+      url       = encodeURIComponent(feedbin.selectedEntryData.url)
+      title     = encodeURIComponent(feedbin.selectedEntryData.title)
+      source    = encodeURIComponent(feedbin.selectedEntryData.feed_title)
+      id        = feedbin.selectedEntryData.id
+      rawUrl    = feedbin.selectedEntryData.url
+      twitterId = feedbin.selectedEntryData.twitter_id
+
+      index = 0
+      menu = $('[data-behavior~=share_options]')
+      for item in services
+        finalUrl = item.url
+          .replace('${url}',        url)
+          .replace('${title}',      title)
+          .replace('${source}',     source)
+          .replace('${id}',         id)
+          .replace('${raw_url}',    rawUrl)
+          .replace('${twitter_id}', twitterId)
+          .replace('9999999999',    id)
+
+        li       = $('<li>').addClass('share-option')
+        label    = $('<div>').addClass('label').text(item.label)
+        keyboard = $('<i>').addClass('share-keyboard').text(index)
+        link     = $('<a>').attr('href', finalUrl)
+
+        if "html_options" of item
+          link.attr(item.html_options)
+
+        link.append(label)
+        if index < 10
+          link.append(keyboard)
+        li.append(link)
+
+        menu.append(li)
+
+        index += 1
+
   hideLinkAction: (url) ->
     if url of feedbin.linkActions
       tooltip = feedbin.linkActions[url].tooltip
@@ -1213,6 +1261,7 @@ $.extend feedbin,
     $('body').removeClass('extract-active')
     feedbin.updateEntryContent(entry.content, entry.inner_content)
     feedbin.formatEntryContent(entryId, true)
+    feedbin.prepareShareMenu()
     if feedbin.viewType == 'updated'
       $('[data-behavior~=change_content_view][data-view-mode=diff]').prop('checked', true).change()
     else if feedbin.data.subscription_view_mode[entry.feed_id] == "newsletter"
@@ -2776,6 +2825,28 @@ $.extend feedbin,
           tooltipTarget.addClass("right")
           tooltipTarget.css
             right: "#{parentWidth - bar.offsetLeft - 18}px"
+
+    sharePopup: ->
+      $(document).on 'click', '[data-behavior~=share_popup]', (event) ->
+        url = $(@).attr('href')
+        feedbin.sharePopup(url)
+        event.preventDefault()
+        event.stopPropagation()
+
+    navigatorShare: ->
+      $(document).on 'click', '[data-behavior~=navigator_share]', (event) ->
+        data =
+          title: feedbin.selectedEntryData.title,
+          url: feedbin.selectedEntryData.url,
+
+        selection = feedbin.getSelectedText()
+        if selection != ""
+          data.text = selection
+
+        navigator.share(data)
+
+        event.preventDefault()
+        event.stopPropagation()
 
     copy: ->
       $(document).on 'click', '[data-behavior~=copy]', (event) ->
