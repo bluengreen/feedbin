@@ -7,7 +7,6 @@ class ApplicationController < ActionController::Base
   before_action :authorize
   before_action :set_user
   before_action :honeybadger_context
-  after_action :set_csrf_cookie
 
   etag { current_user.try :id }
 
@@ -197,18 +196,13 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def set_csrf_cookie
-    cookies["XSRF-TOKEN"] = form_authenticity_token if protect_against_forgery?
-  end
-
   def native?
     request.user_agent&.include?("TurbolinksFeedbin")
   end
 
-  protected
-
-  def verified_request?
-    super || valid_authenticity_token?(session, request.headers["X-XSRF-TOKEN"])
+  rescue_from ActionController::InvalidAuthenticityToken do |exception|
+    sign_out
+    redirect_to login_url
   end
 
   private

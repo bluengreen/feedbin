@@ -17,11 +17,11 @@ Rails.application.config.action_view.default_enforce_utf8 = true
 Rails.application.config.action_dispatch.use_cookies_with_metadata = false
 
 # Return false instead of self when enqueuing is aborted from a callback.
-# Rails.application.config.active_job.return_false_on_aborted_enqueue = true
+Rails.application.config.active_job.return_false_on_aborted_enqueue = true
 
 # Send Active Storage analysis and purge jobs to dedicated queues.
-# Rails.application.config.active_storage.queues.analysis = :active_storage_analysis
-# Rails.application.config.active_storage.queues.purge    = :active_storage_purge
+Rails.application.config.active_storage.queues.analysis = :active_storage_analysis
+Rails.application.config.active_storage.queues.purge    = :active_storage_purge
 
 # Use ActionMailer::MailDeliveryJob for sending parameterized and normal mail.
 #
@@ -30,4 +30,4 @@ Rails.application.config.action_dispatch.use_cookies_with_metadata = false
 # If you send mail in the background, job workers need to have a copy of
 # MailDeliveryJob to ensure all delivery jobs are processed properly.
 # Make sure your entire app is migrated and stable on 6.0 before using this setting.
-# Rails.application.config.action_mailer.delivery_job = "ActionMailer::MailDeliveryJob"
+Rails.application.config.action_mailer.delivery_job = "ActionMailer::MailDeliveryJob"
