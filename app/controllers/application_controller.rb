@@ -200,10 +200,10 @@ class ApplicationController < ActionController::Base
     request.user_agent&.include?("TurbolinksFeedbin")
   end
 
-  rescue_from ActionController::InvalidAuthenticityToken do |exception|
-    sign_out
-    redirect_to login_url
-  end
+  # rescue_from ActionController::InvalidAuthenticityToken do |exception|
+  #   sign_out
+  #   redirect_to login_url
+  # end
 
   private
 
