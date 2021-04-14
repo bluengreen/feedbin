@@ -281,7 +281,6 @@ class feedbin.Keyboard
       shareMenu = $('[data-behavior~=share_options]')
       if shareMenu.length > 0
         item = $("[data-keyboard-shortcut=#{combo}]", shareMenu)
-        console.log item
         $("[data-keyboard-shortcut=#{combo}]", shareMenu)[0].click()
 
     # Full Screen
