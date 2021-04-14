@@ -53,10 +53,10 @@ $.extend feedbin,
       li.append(link)
 
     services = [].concat(feedbin.data.sharing)
-    index = 1
+    offset = 1
     if "share" of navigator
       if services.length > 0
-        index = 0
+        offset = 0
         services.unshift({url: '#', label: "Share using…", html_options: {"data-behavior": "navigator_share"}})
       else
         $('[data-behavior~=toggle_share_menu]').attr("data-behavior", "navigator_share toggle_share_menu")
@@ -64,10 +64,9 @@ $.extend feedbin,
       services.unshift({url: feedbin.data.sharing_path, label: "Configure…"})
 
     if services.length > 0
-      menu = $('[data-behavior~=share_options]')
-      for item in services
-        menu.append(buildLink(item, index))
-        index += 1
+      markup = services.map (service, index) ->
+        buildLink(service, index + offset)
+      $('[data-behavior~=share_options]').html(markup)
 
   hideLinkAction: (url) ->
     if url of feedbin.linkActions
