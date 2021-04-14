@@ -282,6 +282,7 @@ class feedbin.Keyboard
       if shareMenu.length > 0
         item = $("[data-keyboard-shortcut=#{combo}]", shareMenu)
         $("[data-keyboard-shortcut=#{combo}]", shareMenu)[0].click()
+        event.preventDefault()
 
     # Full Screen
     Mousetrap.bind 'F', (event, combo) =>
