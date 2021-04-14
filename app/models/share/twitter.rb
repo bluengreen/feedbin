@@ -7,10 +7,8 @@ class Share::Twitter < Share::Service
 
   def share(params); end
 
-  def link_options
-    action = share(nil)
-    defaults = super
-    defaults.merge({
+  def share_link
+    super.merge({
       url: "#{URL}?url=${url}&text=${title}",
       html_options: {"data-behavior" => "share_popup"}
     })

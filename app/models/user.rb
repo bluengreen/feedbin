@@ -508,7 +508,7 @@ class User < ApplicationRecord
     (sharing_services + supported_sharing_services)
       .select  { |sharing_service| sharing_service.active?      }
       .sort_by { |sharing_service| sharing_service.label        }
-      .map     { |sharing_service| sharing_service.link_options }
+      .map     { |sharing_service| sharing_service.share_link }
   end
 
   def can_read_filter(requested_ids)
