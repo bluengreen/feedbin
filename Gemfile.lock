@@ -105,6 +105,18 @@ GIT
     oauth (0.5.5)
 
 GIT
+  remote: https://github.com/feedbin/oauth2.git
+  revision: a73cc01dfdc0370b0c67432f6f0d0caeb9046a8e
+  branch: feedbin
+  specs:
+    oauth2 (1.4.7)
+      faraday (>= 0.8, < 2.0)
+      jwt (>= 1.0, < 3.0)
+      multi_json (~> 1.3)
+      multi_xml (~> 0.5)
+      rack (>= 1.2, < 3)
+
+GIT
   remote: https://github.com/feedbin/opml_saw.git
   revision: 61d8c2dd3d46e9cae38178754469dd9da7c8bd6a
   ref: 61d8c2d
@@ -353,6 +365,7 @@ GEM
       railties (>= 4.2.0)
       thor (>= 0.14, < 2.0)
     json (2.5.1)
+    jwt (2.2.3)
     kgio (2.11.3)
     librato-metrics (1.6.2)
       aggregate (~> 0.2.2)
@@ -645,6 +658,7 @@ DEPENDENCIES
   minitest-stub_any_instance
   net-http-persistent
   oauth!
+  oauth2!
   opml_saw!
   pg
   premailer-rails

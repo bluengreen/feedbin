@@ -51,7 +51,7 @@ class Share::Tumblr < Share::Service
     JSON.load(result.body)
   end
 
-  def add(params)
+  def add(params, entry)
     @klass.update(default_option: params[:site])
     options = {
       format: params["format"],

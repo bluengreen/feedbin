@@ -70,7 +70,7 @@ class Share::Pocket < Share::Service
     OpenStruct.new(token: @access_token, access_secret: nil)
   end
 
-  def add(params)
+  def add(params, entry)
     options = {
       body: {
         url: params["entry_url"],

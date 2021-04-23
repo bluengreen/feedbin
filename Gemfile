@@ -18,6 +18,7 @@ gem "opml_saw",            github: "feedbin/opml_saw",            ref: "61d8c2d"
 gem "elasticsearch-model", github: "feedbin/elasticsearch-rails", branch: "2.x"
 gem "twitter",             github: "feedbin/twitter",             branch: "feedbin"
 gem "oauth",               github: "feedbin/oauth-ruby",          branch: "feedbin"
+gem "oauth2",              github: "feedbin/oauth2",              branch: "feedbin"
 
 gem "activerecord-import"
 gem "addressable", require: "addressable/uri"

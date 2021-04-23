@@ -18,7 +18,7 @@ class Share::Pinboard < Share::Service
     end
   end
 
-  def add(params)
+  def add(params, entry)
     defaults = {auth_token: @auth_token, format: "json"}
     options = params.slice(:toread, :shared, :tags, :extended, :description, :url)
     response = self.class.get("/posts/add", query: defaults.merge(options), timeout: 10)

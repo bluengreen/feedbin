@@ -20,7 +20,7 @@ class Share::Readability < Share::Service
     OAuth::Consumer.new(ENV["READABILITY_READER_KEY"], ENV["READABILITY_READER_SECRET"], options)
   end
 
-  def add(params)
+  def add(params, entry)
     response = @client.post("/api/rest/v1/bookmarks", {url: params["entry_url"]})
     code = response.code.to_i
     if [202, 409].include?(code)

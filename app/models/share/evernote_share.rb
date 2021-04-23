@@ -50,7 +50,7 @@ class Share::EvernoteShare < Share::Service
     authenticated_share(@klass, params)
   end
 
-  def add(params)
+  def add(params, entry)
     entry = Entry.find(params[:entry_id])
     content = determine_content(params)
     content = ContentFormatter.evernote_format(content, entry)

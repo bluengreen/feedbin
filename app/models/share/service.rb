@@ -3,9 +3,10 @@ class Share::Service
     response = {}
     entry = Entry.find(params[:entry_id])
     params["entry_url"] = entry.fully_qualified_url
-    if klass.active?
-      # child classes using this need to implement add
-      status = add(params)
+    if !klass.user.can_read_entry?(entry.id)
+      response[:error] = "Unable to save to #{klass.label}."
+    elsif klass.active?
+      status = add(params, entry)
       if status == 200
         response[:message] = "Saved to #{klass.label}."
       elsif status == 401

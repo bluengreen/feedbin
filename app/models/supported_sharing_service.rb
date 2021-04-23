@@ -103,11 +103,18 @@ class SupportedSharingService < ApplicationRecord
       html_options: {"data-behavior" => "show_entry_basement", "data-basement-panel" => "micro_blog_share_panel"},
       klass: "Share::MicroBlog",
       has_share_sheet: true
+      }),
+    OpenStruct.new({
+      service_id: "raindrop",
+      label: "Raindrop.io",
+      requires_auth: true,
+      service_type: "oauth2",
+      klass: "Share::Raindrop",
     })
   ].freeze
 
   store_accessor :settings, :access_token, :access_secret, :email_name, :email_address,
-    :kindle_address, :default_option, :api_token
+    :kindle_address, :default_option, :api_token, :oauth2_token
 
   validates :service_id, presence: true, uniqueness: {scope: :user_id}, inclusion: {in: SERVICES.collect { |s| s.service_id }}
   belongs_to :user
@@ -128,6 +135,10 @@ class SupportedSharingService < ApplicationRecord
     else
       result
     end
+  end
+
+  def oauth2_token
+    JSON.load(settings["oauth2_token"])
   end
 
   def remove_access!

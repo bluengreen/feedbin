@@ -18,7 +18,7 @@ class Share::MicroBlog < Share::Service
     end
   end
 
-  def add(params)
+  def add(params, entry)
     body = {
       content: params["content"]
     }

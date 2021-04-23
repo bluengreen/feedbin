@@ -20,7 +20,7 @@ class Share::Instapaper < Share::Service
     OAuth::Consumer.new(ENV["INSTAPAPER_KEY"], ENV["INSTAPAPER_SECRET"], options)
   end
 
-  def add(params)
+  def add(params, entry)
     response = @client.post("/api/1/bookmarks/add", {url: params["entry_url"]})
     code = response.code.to_i
     if code == 201

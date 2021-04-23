@@ -75,6 +75,32 @@ class SupportedSharingServicesController < ApplicationController
     redirect_to sharing_services_url, alert: "Unknown #{service_info[:label]} error."
   end
 
+  def oauth2_response
+    @user = current_user
+    service_info = SupportedSharingService.info!(params[:id])
+    klass = service_info[:klass].constantize.new
+    if params[:code]
+      access_token = klass.request_access(params[:code])
+      supported_sharing_service = @user.supported_sharing_services.where(service_id: params[:id]).first_or_initialize
+      supported_sharing_service.update(oauth2_token: access_token.to_hash.to_json)
+      if supported_sharing_service.errors.present?
+        redirect_to sharing_services_url, alert: supported_sharing_service.errors.full_messages.join(". ")
+      else
+        supported_sharing_service.try(:after_activate)
+        redirect_to sharing_services_url, notice: "#{supported_sharing_service.label} has been activated!"
+      end
+    else
+      redirect_to sharing_services_url, alert: "Feedbin needs your permission to activate #{service_info[:label]}."
+    end
+  rescue OAuth2::Error => e
+    Honeybadger.notify(
+      error_class: "SupportedSharingServicesController#oauth2_response",
+      error_message: "#{service_info[:label]} failure",
+      parameters: {exception: e}
+    )
+    redirect_to sharing_services_url, alert: "Unknown #{service_info[:label]} error."
+  end
+
   private
 
   def supported_sharing_service_params
@@ -87,6 +113,8 @@ class SupportedSharingServicesController < ApplicationController
       oauth_request(service_id)
     elsif service_info[:service_type] == "xauth" || service_info[:service_type] == "pinboard"
       xauth_request(service_id)
+    elsif service_info[:service_type] == "oauth2"
+      oauth2_request(service_id)
     end
   end
 
@@ -138,5 +166,11 @@ class SupportedSharingServicesController < ApplicationController
       parameters: {exception: e}
     )
     redirect_to sharing_services_url, alert: "Unknown #{service_info[:label]} error."
+  end
+
+  def oauth2_request(service_id)
+    service_info = SupportedSharingService.info!(service_id)
+    klass = service_info[:klass].constantize.new
+    redirect_to klass.request_token
   end
 end
