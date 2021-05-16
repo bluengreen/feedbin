@@ -20,8 +20,8 @@ class NewslettersController < ApplicationController
     if user && newsletter.valid?
       NewsletterEntry.create(newsletter, user)
     end
-    active = user ? !user.suspended : false
-    Librato.increment "newsletter.user_active.#{active}"
+    head :ok
+  rescue ActiveRecord::RecordNotUnique
     head :ok
   end
 
