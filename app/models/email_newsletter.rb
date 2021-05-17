@@ -15,12 +15,8 @@ class EmailNewsletter
     full_token.split("+").first
   end
 
-  def to_email
-    @email.to.first
-  end
-
   def from_email
-    @email.from.first
+    parsed_from.address
   end
 
   def from_name
@@ -31,12 +27,16 @@ class EmailNewsletter
     parsed_from.name
   end
 
+  def from
+    parsed_from.decoded
+  end
+
   def subject
     @email.subject
   end
 
   def text
-    @email.text? ? @email.body.decoded : @email.text_part&.decoded
+    @email.text? ? @email.decoded : @email.text_part&.decoded
   end
 
   def html
@@ -81,14 +81,14 @@ class EmailNewsletter
     }
   end
 
+  def to_s
+    @email.to_s
+  end
+
   private
 
   def parsed_from
-    Mail::Address.new(@email[:from].formatted.first)
-  rescue Mail::Field::ParseError
-    name, address = @email[:from].formatted.first.split(/[<>]/).map(&:strip)
-    domain = address.split("@").last
-    OpenStruct.new(name: name, address: address, domain: domain)
+    @email[:from].address_list.addresses.first
   end
 
 end

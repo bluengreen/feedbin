@@ -14,12 +14,15 @@ class NewslettersController < ApplicationController
   end
 
   def raw
-    email = Mail.from_source(request.body.read)
-    newsletter = EmailNewsletter.new(email, params[:token])
-    user = AuthenticationToken.newsletters.active.where(token: newsletter.token).take&.user
-    if user && newsletter.valid?
-      NewsletterEntry.create(newsletter, user)
+    token = params[:token].split("+").first
+    user = AuthenticationToken.newsletters.active.where(token: token).take&.user
+    if user
+      email = Mail.from_source(request.body.read).without_attachments!
+      newsletter = EmailNewsletter.new(email, params[:token])
+      NewsletterEntryNext.create(newsletter, user)
     end
+    active = user ? !user.suspended : false
+    Librato.increment "newsletter.user_active.#{active}"
     head :ok
   rescue ActiveRecord::RecordNotUnique
     head :ok
