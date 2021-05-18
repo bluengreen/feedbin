@@ -15,16 +15,9 @@ class NewslettersController < ApplicationController
 
   def raw
     token = params[:token].split("+").first
-    user = AuthenticationToken.newsletters.active.where(token: token).take&.user
-    if user
-      email = Mail.from_source(request.body.read).without_attachments!
-      newsletter = EmailNewsletter.new(email, params[:token])
-      NewsletterEntryNext.create(newsletter, user)
+    if AuthenticationToken.newsletters.active.where(token: token).exists?
+      NewsletterReceiver.perform_async(params[:token], request.body.read)
     end
-    active = user ? !user.suspended : false
-    Librato.increment "newsletter.user_active.#{active}"
-    head :ok
-  rescue ActiveRecord::RecordNotUnique
     head :ok
   end
 

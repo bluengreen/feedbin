@@ -1,13 +1,19 @@
-class NewsletterEntryNext
+class NewsletterReceiver
   attr_reader :newsletter, :user
+  include Sidekiq::Worker
+  sidekiq_options queue: :feed_refresher_receiver
 
-  def initialize(newsletter, user = nil)
-    @newsletter = newsletter
-    @user = user
-  end
-
-  def self.create(newsletter, user)
-    new(newsletter, user).create
+  def perform(full_token, email)
+    token = full_token.split("+").first
+    @user = AuthenticationToken.newsletters.active.where(token: token).take&.user
+    if @user
+      email = Mail.from_source(email)
+      @newsletter = EmailNewsletter.new(email, full_token)
+      create
+    end
+    active = @user ? !@user.suspended : false
+    Librato.increment "newsletter.user_active.#{active}"
+  rescue ActiveRecord::RecordNotUnique
   end
 
   def create
