@@ -19,6 +19,7 @@ before_fork do |server, worker|
 
   puts "============================================"
   puts Unicorn::HttpServer::START_CTX[0].inspect
+  puts ENV["PWD"]
   puts "============================================"
 
   defined?(ActiveRecord::Base) && ActiveRecord::Base.connection.disconnect!
@@ -39,7 +40,8 @@ end
 before_exec do |server|
   ENV.update Dotenv.load
   ENV["BUNDLE_GEMFILE"] = File.join(working_directory, "Gemfile")
-  puts "============================================"
+  puts "---------------------------------------------"
   puts ENV["BUNDLE_GEMFILE"]
-  puts "============================================"
+  puts ENV["PWD"]
+  puts "---------------------------------------------"
 end
