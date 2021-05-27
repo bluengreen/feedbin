@@ -16,6 +16,11 @@ listen File.join(shared_directory, "tmp", "unicorn.sock")
 logger Logger.new($stdout)
 
 before_fork do |server, worker|
+
+  puts "============================================"
+  puts Unicorn::HttpServer::START_CTX[0].inspect
+  puts "============================================"
+
   defined?(ActiveRecord::Base) && ActiveRecord::Base.connection.disconnect!
   old_pid = "#{server.config[:pid]}.oldbin"
   if old_pid != server.pid
