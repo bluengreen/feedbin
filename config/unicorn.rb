@@ -1,6 +1,10 @@
 require "dotenv"
 require "etc"
 
+puts "____________________________"
+puts File.expand_path("..", __dir__)
+puts "____________________________"
+
 working_directory File.expand_path("..", __dir__)
 shared_directory = File.join(File.expand_path("..", ENV["PWD"]), "shared")
 shared_directory = File.directory?(shared_directory) ? shared_directory : ENV["PWD"]
