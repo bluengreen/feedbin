@@ -43,7 +43,6 @@ end
 
 before_exec do |server|
   ENV.update Dotenv.load
-  ENV["BUNDLE_GEMFILE"] = File.join(working_directory, "Gemfile")
   puts "---------------------------------------------"
   puts ENV["BUNDLE_GEMFILE"]
   puts ENV["PWD"]
