@@ -29,16 +29,6 @@ GIT
     dalli (2.7.10)
 
 GIT
-  remote: https://github.com/feedbin/elasticsearch-rails.git
-  revision: aa2033bb891a3b2545cb3ff633918fcf64c901e5
-  branch: 2.x
-  specs:
-    elasticsearch-model (2.0.2)
-      activesupport (> 3)
-      elasticsearch (~> 2)
-      hashie
-
-GIT
   remote: https://github.com/feedbin/feedjira.git
   revision: e45ed4a8c2170fd054988988e9734d64cb75be1a
   branch: f2
@@ -264,13 +254,17 @@ GEM
     dotenv-rails (2.7.6)
       dotenv (= 2.7.6)
       railties (>= 3.2)
-    elasticsearch (2.0.2)
-      elasticsearch-api (= 2.0.2)
-      elasticsearch-transport (= 2.0.2)
-    elasticsearch-api (2.0.2)
+    elasticsearch (7.5.0)
+      elasticsearch-api (= 7.5.0)
+      elasticsearch-transport (= 7.5.0)
+    elasticsearch-api (7.5.0)
       multi_json
-    elasticsearch-transport (2.0.2)
-      faraday
+    elasticsearch-model (7.1.1)
+      activesupport (> 3)
+      elasticsearch (> 1)
+      hashie
+    elasticsearch-transport (7.5.0)
+      faraday (>= 0.14, < 1)
       multi_json
     equalizer (0.0.11)
     erubi (1.10.0)
@@ -605,8 +599,8 @@ DEPENDENCIES
   coveralls
   dalli!
   dotenv-rails
-  elasticsearch (~> 2.0)
-  elasticsearch-model!
+  elasticsearch (~> 7.0)
+  elasticsearch-model
   evernote_oauth
   faker
   feedjira!
@@ -667,4 +661,4 @@ DEPENDENCIES
   will_paginate
 
 BUNDLED WITH
-   2.2.15
+   2.2.19
