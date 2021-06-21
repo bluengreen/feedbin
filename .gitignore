@@ -18,6 +18,7 @@
 /public/uploads
 .powenv
 .env
+.env*
 .env-tmp
 .env.development
 public
