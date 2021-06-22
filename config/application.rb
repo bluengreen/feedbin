@@ -1,6 +1,20 @@
 require_relative "boot"
 
-require "rails/all"
+# require "rails/all"
+# Pick the frameworks you want:
+require "active_model/railtie"
+require "active_job/railtie"
+require "active_record/railtie"
+require "active_storage/engine"
+require "action_controller/railtie"
+require "action_mailer/railtie"
+require "action_mailbox/engine"
+require "action_text/engine"
+require "action_view/railtie"
+require "action_cable/engine"
+# require "sprockets/railtie"
+require "rails/test_unit/railtie"
+
 require_relative "../lib/basic_authentication"
 require_relative "../lib/tld_length"
 
@@ -34,9 +48,9 @@ module Feedbin
 
     config.active_record.schema_format = :sql
 
-    config.sass.line_comments = true
-    config.assets.compress = true
-    config.action_view.automatically_disable_submit_tag = false
+    # config.sass.line_comments = true
+    # config.assets.compress = true
+    # config.action_view.automatically_disable_submit_tag = false
     config.active_record.belongs_to_required_by_default = false
     config.action_view.default_enforce_utf8 = true
   end
