@@ -59,7 +59,8 @@ services:
   #   restart: always
 
   feedbin-refresher:
-    build: ../refresher
+    # build: ../refresher
+    build: ../feedbin-refresher
     # build:
     #   dockerfile: ./docker/feedbin-refresher/
     #   context: .
