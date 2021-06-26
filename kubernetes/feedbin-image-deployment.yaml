@@ -1,0 +1,152 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: feedbin-image
+  name: feedbin-image
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: feedbin-image
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.22.0 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: feedbin-image
+    spec:
+      containers:
+        - env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                configMapKeyRef:
+                  key: AWS_ACCESS_KEY_ID
+                  name: env
+            - name: AWS_S3_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  key: AWS_S3_BUCKET
+                  name: env
+            - name: AWS_S3_REGION
+              valueFrom:
+                configMapKeyRef:
+                  key: AWS_S3_REGION
+                  name: env
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                configMapKeyRef:
+                  key: AWS_SECRET_ACCESS_KEY
+                  name: env
+            - name: CAMO_HOST
+              valueFrom:
+                configMapKeyRef:
+                  key: CAMO_HOST
+                  name: env
+            - name: CAMO_KEY
+              valueFrom:
+                configMapKeyRef:
+                  key: CAMO_KEY
+                  name: env
+            - name: DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: DATABASE_URL
+                  name: env
+            - name: DEFAULT_URL_OPTIONS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  key: DEFAULT_URL_OPTIONS_HOST
+                  name: env
+            - name: ELASTICSEARCH_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: ELASTICSEARCH_URL
+                  name: env
+            - name: EXTRACT_HOST
+              valueFrom:
+                configMapKeyRef:
+                  key: EXTRACT_HOST
+                  name: env
+            - name: EXTRACT_POST
+              valueFrom:
+                configMapKeyRef:
+                  key: EXTRACT_POST
+                  name: env
+            - name: EXTRACT_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  key: EXTRACT_SECRET
+                  name: env
+            - name: EXTRACT_USER
+              valueFrom:
+                configMapKeyRef:
+                  key: EXTRACT_USER
+                  name: env
+            - name: FEEDBIN_HOST
+              valueFrom:
+                configMapKeyRef:
+                  key: FEEDBIN_HOST
+                  name: env
+            - name: FEEDBIN_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: FEEDBIN_URL
+                  name: env
+            - name: MEMCACHED_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  key: MEMCACHED_HOSTS
+                  name: env
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  key: PORT
+                  name: env
+            - name: PUSH_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: PUSH_URL
+                  name: env
+            - name: RACK_ENV
+              valueFrom:
+                configMapKeyRef:
+                  key: RACK_ENV
+                  name: env
+            - name: RAILS_ENV
+              valueFrom:
+                configMapKeyRef:
+                  key: RAILS_ENV
+                  name: env
+            - name: REDIS_ID_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: REDIS_ID_URL
+                  name: env
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: REDIS_URL
+                  name: env
+            - name: REDIS_URL_ENTRY_CREATED
+              valueFrom:
+                configMapKeyRef:
+                  key: REDIS_URL_ENTRY_CREATED
+                  name: env
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                configMapKeyRef:
+                  key: SECRET_KEY_BASE
+                  name: env
+          image: feedbin-image
+          name: feedbin-image
+          resources: {}
+      restartPolicy: Always
+status: {}
