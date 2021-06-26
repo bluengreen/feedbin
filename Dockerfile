@@ -29,7 +29,7 @@ RUN gem install bundler -v '2.2.19' \
 
 COPY . $RAILS_ROOT
 
-RUN bundle exec rake assets:precompile
+# RUN bundle exec rake assets:precompile
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
 # ENV RAILS_SERVE_STATIC_FILES=true

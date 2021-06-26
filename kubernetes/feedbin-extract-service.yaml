@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: feedbin-extract
+  name: feedbin-extract
+spec:
+  ports:
+    - name: "4000"
+      port: 4000
+      targetPort: 3000
+  selector:
+    io.kompose.service: feedbin-extract
+status:
+  loadBalancer: {}
