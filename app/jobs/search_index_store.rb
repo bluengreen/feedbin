@@ -6,7 +6,7 @@ class SearchIndexStore
     entry = Entry.find(id)
     document = entry.search_data
     index(entry, document)
-    percolate(entry, document, update)
+    # percolate(entry, document, update)
   rescue ActiveRecord::RecordNotFound
   end
 
@@ -22,22 +22,22 @@ class SearchIndexStore
     end
   end
 
-  def percolate(entry, document, update)
-    result = Entry.__elasticsearch__.client.percolate(
-      index: Entry.index_name,
-      type: Entry.document_type,
-      percolate_format: "ids",
-      body: {
-        doc: document,
-        filter: {
-          term: {feed_id: entry.feed_id}
-        }
-      }
-    )
-
-    ids = result["matches"].map(&:to_i)
-    if ids.present?
-      ActionsPerform.perform_async(entry.id, ids, update)
-    end
-  end
+  # def percolate(entry, document, update)
+  #   result = Entry.__elasticsearch__.client.percolate(
+  #     index: Entry.index_name,
+  #     type: Entry.document_type,
+  #     percolate_format: "ids",
+  #     body: {
+  #       doc: document,
+  #       filter: {
+  #         term: {feed_id: entry.feed_id}
+  #       }
+  #     }
+  #   )
+  #
+  #   ids = result["matches"].map(&:to_i)
+  #   if ids.present?
+  #     ActionsPerform.perform_async(entry.id, ids, update)
+  #   end
+  # end
 end

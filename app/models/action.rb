@@ -16,8 +16,8 @@ class Action < ApplicationRecord
 
   validate :query_valid, unless: :automatic_modification
 
-  after_destroy :percolate_destroy
-  after_commit :percolate_create, on: [:create, :update]
+  # after_destroy :percolate_destroy
+  # after_commit :percolate_create, on: [:create, :update]
   after_commit :bulk_actions, on: [:create, :update]
 
   before_save :record_status
@@ -28,13 +28,13 @@ class Action < ApplicationRecord
     end
   end
 
-  def percolate_create
-    PercolateCreate.perform_async(id)
-  end
-
-  def percolate_destroy
-    PercolateDestroy.perform_async(id)
-  end
+  # def percolate_create
+  #   PercolateCreate.perform_async(id)
+  # end
+  #
+  # def percolate_destroy
+  #   PercolateDestroy.perform_async(id)
+  # end
 
   def bulk_actions
     ActionsBulk.perform_async(id, user.id) if apply_action == "1"

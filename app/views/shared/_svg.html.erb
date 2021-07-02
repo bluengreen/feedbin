@@ -1,9 +1,0 @@
-<svg class="hide">
-    <defs>
-        <% Feedbin::Application.config.icons.each do |name, icon| %>
-            <g id="<%= name %>">
-                <%= icon.markup.html_safe %>
-            </g>
-        <% end %>
-    </defs>
-</svg>

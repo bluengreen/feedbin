@@ -15,12 +15,12 @@ class CacheEntryViews
   def cache_views
     entry_ids = dequeue_ids(SET_NAME)
     entries = Entry.where(id: entry_ids).includes(feed: [:favicon])
-    ApplicationController.render({
-      partial: "entries/entry",
-      collection: entries,
-      format: :html,
-      cached: true
-    })
+    # ApplicationController.render({
+    #   partial: "entries/entry",
+    #   collection: entries,
+    #   format: :html,
+    #   cached: true
+    # })
     ApplicationController.render({
       layout: nil,
       template: "api/v2/entries/index",
