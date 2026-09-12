@@ -27,16 +27,16 @@ module Searchable
     }
 
     settings search_settings do
-      mappings _source: {enabled: false} do
-        indexes :id, type: "long", index: :not_analyzed
-        indexes :title, analyzer: "snowball", fields: {exact: {type: "string", analyzer: "lower_exact"}}
-        indexes :content, analyzer: "snowball", fields: {exact: {type: "string", analyzer: "lower_exact"}}
-        indexes :emoji, analyzer: "whitespace", fields: {exact: {type: "string", analyzer: "whitespace"}}
-        indexes :author, analyzer: "lower_exact", fields: {exact: {type: "string", analyzer: "lower_exact"}}
-        indexes :url, analyzer: "keyword", fields: {exact: {type: "string", analyzer: "keyword"}}
-        indexes :feed_id, type: "long", index: :not_analyzed, include_in_all: false
-        indexes :published, type: "date", include_in_all: false
-        indexes :updated, type: "date", include_in_all: false
+      mappings _source: {enabled: true} do
+        indexes :id, type: "long" #, index: :not_analyzed
+        indexes :title, analyzer: "snowball", fields: {exact: {type: "text", analyzer: "lower_exact"}}
+        indexes :content, analyzer: "snowball", fields: {exact: {type: "text", analyzer: "lower_exact"}}
+        indexes :emoji, analyzer: "whitespace", fields: {exact: {type: "text", analyzer: "whitespace"}}
+        indexes :author, analyzer: "lower_exact", fields: {exact: {type: "text", analyzer: "lower_exact"}}
+        indexes :url, analyzer: "keyword", fields: {exact: {type: "text", analyzer: "keyword"}}
+        indexes :feed_id, type: "long" #, index: :not_analyzed #, include_in_all: false
+        indexes :published, type: "date" #, include_in_all: false
+        indexes :updated, type: "date" #, include_in_all: false
         indexes :link, analyzer: "lower_exact"
 
         indexes :twitter_screen_name, analyzer: "whitespace"

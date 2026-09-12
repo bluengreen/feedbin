@@ -1,0 +1,154 @@
+version: '3'
+
+# volumes:
+#   # feedbin_redis:
+#   # feedbin_db:
+#   # feedbin_elasticsearch:
+#   # feedbin_minio:
+#   feedbin_caddy:
+
+services:
+  feedbin-web:
+    # build: .
+    #   args:
+    #     FEEDBIN_URL: ${FEEDBIN_URL}
+    # build:
+    #   context: .
+    #   args:
+    #     FEEDBIN_URL: ${FEEDBIN_URL}
+    #   dockerfile: Dockerfile
+    image: feedbin-local:latest
+    # depends_on:
+      # - feedbin-redis
+      # - feedbin-postgres
+      # - feedbin-elasticsearch
+      # - feedbin-memcached
+      # - feedbin-minio
+    environment:
+      PORT: 3000
+    ports:
+      - 3000:3000
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:3000"]
+    env_file:
+     - ./.env
+    command: bundle exec rails s --port 3000 --binding 0.0.0.0
+    restart: always
+    # mem_limit: 512m
+
+  feedbin-workers:
+    # build: .
+    image: feedbin-local:latest
+    env_file:
+     - ./.env
+    command: foreman start
+    restart: always
+    # mem_limit: 512m
+
+  # feedbin-caddy:
+  #   image: abiosoft/caddy:1.0.3
+  #   volumes:
+  #     - feedbin_caddy:/etc/ssl/caddy
+  #     - ./caddy/Caddyfile:/etc/Caddyfile:ro
+  #   env_file:
+  #    - ./.env
+  #   ports:
+  #     - 80:80
+  #     - 443:443
+  #     - 2015:2015
+  #   restart: always
+
+  feedbin-refresher:
+    # build: ../refresher
+    build: ../feedbin-refresher
+    # build:
+    #   dockerfile: ./docker/feedbin-refresher/
+    #   context: .
+    # image: feedbin-refresher:latest
+    env_file:
+      - ./.env
+    restart: always
+    # mem_limit: 512m
+
+  feedbin-image:
+    build: ../feedbin-image
+    env_file:
+      - ./.env
+    restart: always
+    # mem_limit: 512m
+
+  camo:
+    # image: increments/camo
+    build: ../camo
+    # docker build -t camo .
+    # docker run --env CAMO_KEY=YOUR_KEY -t camo
+    environment:
+      - CAMO_KEY=key
+      - PORT=8081
+    ports:
+      - 8081:8081
+    env_file:
+     - ./.env
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8081"]
+    restart: always
+
+  feedbin-extract:
+    build:
+      context: ../feedbin-extract
+    env_file:
+      - ./.env
+    ports:
+      - 4000:3000
+    restart: always
+    # mem_limit: 512m
+
+
+
+  # feedbin-minio:
+  #   image: minio/minio
+  #   volumes:
+  #   - feedbin_minio:/data
+  #   env_file:
+  #    - ./.env
+  #   command: server /data
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+  #   restart: always
+
+  # feedbin-elasticsearch:
+  #   image: elasticsearch:2.4
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:9200"]
+  #   volumes:
+  #     - feedbin_elasticsearch:/usr/share/elasticsearch/data
+  #   environment:
+  #     - bootstrap.memory_lock=true
+  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  #     - discovery.type=single-node
+  #   ulimits:
+  #     memlock:
+  #       soft: -1
+  #       hard: -1
+  #   mem_limit: 1g
+  #   restart: always
+
+  # feedbin-memcached:
+  #   image: memcached:1.5
+  #   restart: always
+  #
+  # feedbin-redis:
+  #   image: redis:5
+  #   command: "redis-server --appendonly yes"
+  #   volumes:
+  #     - feedbin_redis:/data
+  #   restart: always
+
+  # feedbin-postgres:
+  #   image: postgres:13
+  #   env_file:
+  #    - ./.env
+  #   volumes:
+  #     - feedbin_db:/var/lib/postgresql/data
+  #   restart: always
+  #   mem_limit: 512m
